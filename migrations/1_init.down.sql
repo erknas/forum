@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS post_author;
+
+DROP TABLE IF EXISTS comment_author;
+
+DROP TABLE IF EXISTS posts;
+
+DROP TABLE IF EXISTS comments;

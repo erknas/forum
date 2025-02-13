@@ -1,0 +1,47 @@
+type Post {
+  id: ID!
+  title: String!
+  author: String!
+  content: String!
+  createdAt: String!
+  commentsAllowed: Boolean!
+  comments: [Comment!]
+}
+
+input PostInput {
+  title: String!
+  author: String!
+  content: String!
+  commentsAllowed: Boolean!
+}
+
+type Comment {
+  id: ID!
+  author: String!
+  content: String!
+  createdAt: String!
+  postID: ID!
+  parentID: ID
+  replies: [Comment!]
+}
+
+input CommentInput {
+  postID: ID!
+  author: String!
+  content: String!
+  parentID: ID
+}
+
+type Query {
+  GetPosts: [Post!]!
+  GetPostByID(id: ID!, page: Int, pageSize: Int): Post
+}
+
+type Mutation {
+  CreatePost(input: PostInput!): Post!
+  CreateComment(input: CommentInput!): Comment!
+}
+
+type Subscription {
+  CommentAdded(postId: ID!): Comment!
+}
