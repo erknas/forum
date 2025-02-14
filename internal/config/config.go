@@ -8,8 +8,8 @@ import (
 )
 
 type Config struct {
-	Addr     string `env:"ADDR"`
-	InMemory bool   `env:"IN_MEMORY"`
+	Addr string `env:"ADDR"`
+	// InMemory bool   `env:"IN_MEMORY"`
 	PostgresConfig
 }
 

@@ -2,14 +2,15 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	"github.com/erknas/forum/graph/model"
 	"github.com/erknas/forum/internal/storage"
+	"github.com/erknas/forum/internal/subscription"
 	"github.com/erknas/forum/pkg/conv"
 	"github.com/erknas/forum/pkg/pagination"
 	"github.com/erknas/forum/pkg/sl"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 type Servicer interface {
@@ -22,17 +23,22 @@ type Servicer interface {
 
 type Service struct {
 	store storage.Storer
+	sub   subscription.Subscriber
 }
 
-func New(store storage.Storer) *Service {
+func New(store storage.Storer, sub subscription.Subscriber) *Service {
 	return &Service{
 		store: store,
+		sub:   sub,
 	}
 }
 
 func (s *Service) CreatePost(ctx context.Context, input model.PostInput) (*model.Post, error) {
 	if errors := input.ValidatePostInput(); len(errors) > 0 {
-		return nil, fmt.Errorf("invalid request data: %v", errors)
+		return nil, &gqlerror.Error{
+			Message:    "invalid request data",
+			Extensions: errors,
+		}
 	}
 
 	customPost, err := s.store.CreatePost(ctx, input)
@@ -88,7 +94,10 @@ func (s *Service) PostByID(ctx context.Context, strID string) (*model.Post, erro
 
 func (s *Service) CreateComment(ctx context.Context, input model.CommentInput) (*model.Comment, error) {
 	if errors := input.ValidateCommentInput(); len(errors) > 0 {
-		return nil, fmt.Errorf("invalid request data: %v", errors)
+		return nil, &gqlerror.Error{
+			Message:    "invalid request data",
+			Extensions: errors,
+		}
 	}
 
 	customInput, err := input.Convert()
@@ -105,6 +114,8 @@ func (s *Service) CreateComment(ctx context.Context, input model.CommentInput) (
 
 	comment := customComment.Convert()
 
+	s.sub.Publish(comment.PostID, &comment)
+
 	slog.Info("CreateComment OK", "comment", comment)
 
 	return &comment, nil
@@ -119,7 +130,7 @@ func (s *Service) CommentsByPost(ctx context.Context, id string, page *int32, pa
 		return nil, err
 	}
 
-	slog.Info("CommentsByPost OK", "post_id", id)
+	slog.Info("CommentsByPost OK", "post_id", id, "offset", offset, "limit", limit)
 
 	return comments, nil
 }

@@ -2,6 +2,7 @@ package graph
 
 import (
 	"github.com/erknas/forum/internal/service"
+	"github.com/erknas/forum/internal/subscription"
 )
 
 // This file will not be regenerated automatically.
@@ -10,4 +11,5 @@ import (
 
 type Resolver struct {
 	Svc service.Servicer
+	Sub subscription.Subscriber
 }

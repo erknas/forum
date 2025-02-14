@@ -75,16 +75,24 @@ func (s *InMemoryStorage) CreateComment(_ context.Context, input model.CustomCom
 
 	post, ok := s.posts[input.PostID]
 	if !ok {
-		return model.CustomComment{}, fmt.Errorf("post not found")
+		return comment, fmt.Errorf("post not found")
 	}
 
 	if !post.CommentsAllowed {
-		return model.CustomComment{}, fmt.Errorf("comments not allowed")
+		return comment, fmt.Errorf("comments not allowed")
+	}
+
+	if input.ParentID != nil && *input.ParentID > len(post.Comments) {
+		return comment, fmt.Errorf("comment does not exist")
+	}
+
+	if input.ParentID != nil && post.Comments[*input.ParentID-1] == nil {
+		return comment, fmt.Errorf("comment does not exist")
 	}
 
 	s.commentID++
 
-	res := &model.CustomComment{
+	comment = model.CustomComment{
 		ID:        s.commentID,
 		Author:    input.Author,
 		Content:   input.Content,
@@ -93,11 +101,11 @@ func (s *InMemoryStorage) CreateComment(_ context.Context, input model.CustomCom
 		ParentID:  input.ParentID,
 	}
 
-	s.comments[res.ID] = res
+	s.comments[comment.ID] = &comment
 
-	post.Comments = append(post.Comments, res)
+	post.Comments = append(post.Comments, &comment)
 
-	return *res, nil
+	return comment, nil
 }
 
 func (s *InMemoryStorage) GetCommentsByPost(_ context.Context, postID int, offset int, limit int) ([]model.CustomComment, error) {

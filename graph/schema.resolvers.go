@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/erknas/forum/graph/model"
 )
@@ -60,7 +59,14 @@ func (r *queryResolver) GetPostByID(ctx context.Context, id string, page *int32,
 
 // CommentAdded is the resolver for the CommentAdded field.
 func (r *subscriptionResolver) CommentAdded(ctx context.Context, postID string) (<-chan *model.Comment, error) {
-	panic(fmt.Errorf("not implemented: CommentAdded - CommentAdded"))
+	ch := r.Sub.Subscribe(postID)
+
+	go func() {
+		<-ctx.Done()
+		r.Sub.Unsubscribe(postID, ch)
+	}()
+
+	return ch, nil
 }
 
 // Mutation returns MutationResolver implementation.

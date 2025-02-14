@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  forum_inmemory:
+    container_name: forum_app_inmemory
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - ${ADDR}:${ADDR}
+    environment:
+      IN_MEMORY: "true"

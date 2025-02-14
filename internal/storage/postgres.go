@@ -173,6 +173,15 @@ func (p *PostgresPool) CreateComment(ctx context.Context, input model.CustomComm
 		}
 	}()
 
+	commentExists, err := p.commentExists(ctx, input.PostID, input.ParentID)
+	if err != nil {
+		return comment, err
+	}
+
+	if !commentExists && input.ParentID != nil {
+		return comment, fmt.Errorf("comment does not exist")
+	}
+
 	allowed, err := p.isAllowed(ctx, input.PostID)
 	if err != nil {
 		return comment, err
@@ -182,7 +191,7 @@ func (p *PostgresPool) CreateComment(ctx context.Context, input model.CustomComm
 		return comment, fmt.Errorf("comments not allowed")
 	}
 
-	exists, err := p.commentAuthorExists(ctx, input.Author)
+	authorExists, err := p.commentAuthorExists(ctx, input.Author)
 	if err != nil {
 		return comment, err
 	}
@@ -191,7 +200,7 @@ func (p *PostgresPool) CreateComment(ctx context.Context, input model.CustomComm
 					  VALUES ($1, $2, $3, $4) 
 					  RETURNING id, created_at`
 
-	if !exists {
+	if !authorExists {
 		authorID, err := p.insertCommentAuthor(ctx, input.Author)
 		if err != nil {
 			return comment, err
@@ -374,4 +383,17 @@ func (p *PostgresPool) isAllowed(ctx context.Context, id int) (bool, error) {
 	}
 
 	return allowed, nil
+}
+
+func (p *PostgresPool) commentExists(ctx context.Context, postID int, id *int) (bool, error) {
+	var (
+		exists bool
+		query  = `SELECT EXISTS(SELECT 1 FROM comment WHERE post_id = $1 AND id = $2)`
+	)
+
+	if err := p.pool.QueryRow(ctx, query, postID, id).Scan(&exists); err != nil {
+		return exists, err
+	}
+
+	return exists, nil
 }

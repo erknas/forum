@@ -85,6 +85,15 @@ func (c CommentInput) Convert() (CustomCommentInput, error) {
 		}, nil
 	}
 
+	if *c.ParentID == "" {
+		return CustomCommentInput{
+			PostID:   postID,
+			Author:   c.Author,
+			Content:  c.Content,
+			ParentID: nil,
+		}, nil
+	}
+
 	parentID, err := conv.ID(*c.ParentID)
 	if err != nil {
 		return CustomCommentInput{}, err
@@ -96,5 +105,4 @@ func (c CommentInput) Convert() (CustomCommentInput, error) {
 		Content:  c.Content,
 		ParentID: &parentID,
 	}, nil
-
 }

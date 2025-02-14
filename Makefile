@@ -6,3 +6,6 @@ run: build
 
 generate:
 	go run github.com/99designs/gqlgen generate 
+	
+test:
+	@go test ./... -v	

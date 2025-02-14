@@ -11,21 +11,11 @@ services:
     ports:
       - ${ADDR}:${ADDR}
     environment:
-      - IN_MEMORY=${IN_MEMORY}
-      - POSTGRES_URL=${POSTGRES_URL}
-
-  forum_inmemory:
-    container_name: forum_app_inmemory
-    build: 
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - ${ADDR}:${ADDR}
-    environment:
-      - IN_MEMORY=${IN_MEMORY}
+      IN_MEMORY: "false"
+      POSTGRES_URL: ${POSTGRES_URL}
 
   postgres:
-    container_name: forum_db
+    container_name: forum_db_postgres
     image: postgres:alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER} 

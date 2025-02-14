@@ -1,7 +1,7 @@
 package model
 
-func (p PostInput) ValidatePostInput() map[string]string {
-	errors := make(map[string]string)
+func (p PostInput) ValidatePostInput() map[string]interface{} {
+	errors := make(map[string]interface{})
 
 	if len(p.Title) == 0 {
 		errors["title"] = "title length cannot be zero"
@@ -15,10 +15,6 @@ func (p PostInput) ValidatePostInput() map[string]string {
 		errors["author"] = "author name length cannot be zero"
 	}
 
-	if len(p.Author) > 100 {
-		errors["author"] = "author name length cannot be more than 16 symbols"
-	}
-
 	if len(p.Content) == 0 {
 		errors["content"] = "content length cannot be zero"
 	}
@@ -26,15 +22,15 @@ func (p PostInput) ValidatePostInput() map[string]string {
 	return errors
 }
 
-func (c CommentInput) ValidateCommentInput() map[string]string {
-	errors := make(map[string]string)
+func (c CommentInput) ValidateCommentInput() map[string]interface{} {
+	errors := make(map[string]interface{})
+
+	if len(c.PostID) == 0 {
+		errors["postID"] = "postID cannot be empty"
+	}
 
 	if len(c.Author) == 0 {
 		errors["author"] = "author name length cannot be zero"
-	}
-
-	if len(c.Author) > 16 {
-		errors["author"] = "author name length cannot be more than 16 symbols"
 	}
 
 	if len(c.Content) == 0 {
