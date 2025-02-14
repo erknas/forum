@@ -6,6 +6,7 @@ import (
 	"github.com/erknas/forum/graph/model"
 )
 
+//go:generate go run github.com/vektra/mockery/v2@v2.52.2 --name=Storer
 type Storer interface {
 	CreatePost(context.Context, model.PostInput) (post model.CustomPost, err error)
 	GetPosts(context.Context) ([]model.CustomPost, error)

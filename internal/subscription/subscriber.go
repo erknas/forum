@@ -6,6 +6,7 @@ import (
 	"github.com/erknas/forum/graph/model"
 )
 
+//go:generate go run github.com/vektra/mockery/v2@v2.52.2 --name=Subscriber
 type Subscriber interface {
 	Subscribe(string) chan *model.Comment
 	Unsubscribe(string, chan *model.Comment)
